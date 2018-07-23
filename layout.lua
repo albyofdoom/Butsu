@@ -28,9 +28,12 @@ Butsu:RegisterForClicks"anyup"
 
 Butsu:SetParent(UIParent)
 Butsu:SetBackdrop{
-	bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = true, tileSize = 16,
-	edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border", edgeSize = 16,
-	insets = {left = 4, right = 4, top = 4, bottom = 4},
+	bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
+	tile = true,
+	tileSize = 24, 
+	edgeSize = 10, 
+	edgeFile = [[Interface\AddOns\Butsu\border]],  
+	insets = {left = 0, right = 0, top = 0, bottom = 0},
 }
 Butsu:SetBackdropColor(0, 0, 0, 1)
 
