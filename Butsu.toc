@@ -1,4 +1,4 @@
-## Interface: 80205
+## Interface: 80300
 ## Title: Butsu
 ## Author: Haste
 ## Version: 2.1.2
