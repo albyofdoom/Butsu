@@ -1,74 +1,78 @@
 local _NAME, _NS = ...
-local Butsu = CreateFrame("Button", _NAME)
+local Butsu = CreateFrame("Button", _NAME, UIParent, "BackdropTemplate")
 Butsu:Hide()
 
-Butsu:SetScript("OnEvent", function(self, event, ...)
-	self[event](self, event, ...)
-end)
+Butsu:SetScript(
+	"OnEvent",
+	function(self, event, ...)
+		self[event](self, event, ...)
+	end
+)
 
 function Butsu:LOOT_OPENED(event, autoloot)
 	self:Show()
 
-	if(not self:IsShown()) then
+	if (not self:IsShown()) then
 		CloseLoot(not autoLoot)
 	end
 
 	local L = _NS.L
-	if(IsFishingLoot()) then
+	if (IsFishingLoot()) then
 		self.title:SetText(L.fish)
-	elseif(not UnitIsFriend("player", "target") and UnitIsDead"target") then
-		self.title:SetText(UnitName"target")
+	elseif (not UnitIsFriend("player", "target") and UnitIsDead "target") then
+		self.title:SetText(UnitName "target")
 	else
 		self.title:SetText(LOOT)
 	end
 
 	-- Blizzard uses strings here
-	if(GetCVar("lootUnderMouse") == "1") then
+	if (GetCVar("lootUnderMouse") == "1") then
 		local x, y = GetCursorPosition()
 		x = x / self:GetEffectiveScale()
 		y = y / self:GetEffectiveScale()
 
 		self:ClearAllPoints()
-		self:SetPoint("TOPLEFT", nil, "BOTTOMLEFT", x-40, y+20)
+		self:SetPoint("TOPLEFT", nil, "BOTTOMLEFT", x - 40, y + 20)
 		self:GetCenter()
 		self:Raise()
 	end
 
 	local m = 0
 	local items = GetNumLootItems()
-	if(items > 0) then
-		for i=1, items do
+	if (items > 0) then
+		for i = 1, items do
 			local slot = _NS.slots[i] or _NS.CreateSlot(i)
 			local texture, item, quantity, currencyID, quality, locked, isQuestItem, questId, isActive = GetLootSlotInfo(i)
 
 			if (currencyID) then
-				item, texture, quantity, quality = CurrencyContainerUtil.GetCurrencyContainerInfo(currencyID, quantity, item, texture, quality)
+				item, texture, quantity, quality =
+					CurrencyContainerUtil.GetCurrencyContainerInfo(currencyID, quantity, item, texture, quality)
 			end
 
-			if(texture) then
+			if (texture) then
 				local color = ITEM_QUALITY_COLORS[quality]
 				local r, g, b = color.r, color.g, color.b
 
 				local slotType = GetLootSlotType(i)
-				if(slotType == LOOT_SLOT_MONEY) then
+				if (slotType == LOOT_SLOT_MONEY) then
 					item = item:gsub("\n", ", ")
 				end
 
-				if(quantity > 1) then
+				if (quantity > 1) then
 					slot.count:SetText(quantity)
 					slot.count:Show()
 				else
 					slot.count:Hide()
 				end
 
-				if(questId and not isActive) then
+				if (questId and not isActive) then
 					slot.quest:Show()
 				else
 					slot.quest:Hide()
 				end
 
-				if(quality > 1 or questId or isQuestItem) then
-					if(questId or isQuestItem) then
+				if (quality > 1 or questId or isQuestItem) then
+					if (questId or isQuestItem) then
 						r, g, b = 1, 1, .2
 					end
 
@@ -97,7 +101,7 @@ function Butsu:LOOT_OPENED(event, autoloot)
 
 		slot.name:SetText(L.empty)
 		slot.name:SetTextColor(color.r, color.g, color.b)
-		slot.icon:SetTexture[[Interface\Icons\INV_Misc_Herb_AncientLichen]]
+		slot.icon:SetTexture [[Interface\Icons\INV_Misc_Herb_AncientLichen]]
 
 		slot.count:Hide()
 		slot.drop:Hide()
@@ -111,35 +115,37 @@ function Butsu:LOOT_OPENED(event, autoloot)
 
 	self:UpdateWidth()
 end
-Butsu:RegisterEvent"LOOT_OPENED"
+Butsu:RegisterEvent "LOOT_OPENED"
 
 function Butsu:LOOT_SLOT_CLEARED(event, slot)
-	if(not self:IsShown()) then return end
+	if (not self:IsShown()) then
+		return
+	end
 
 	_NS.slots[slot]:Hide()
 	self:AnchorSlots()
 end
-Butsu:RegisterEvent"LOOT_SLOT_CLEARED"
+Butsu:RegisterEvent "LOOT_SLOT_CLEARED"
 
 function Butsu:LOOT_CLOSED()
-	StaticPopup_Hide"LOOT_BIND"
+	StaticPopup_Hide "LOOT_BIND"
 	self:Hide()
 
 	for _, v in pairs(_NS.slots) do
 		v:Hide()
 	end
 end
-Butsu:RegisterEvent"LOOT_CLOSED"
+Butsu:RegisterEvent "LOOT_CLOSED"
 
 function Butsu:OPEN_MASTER_LOOT_LIST()
 	ToggleDropDownMenu(1, nil, GroupLootDropDown, LootFrame.selectedLootButton, 0, 0)
 end
-Butsu:RegisterEvent"OPEN_MASTER_LOOT_LIST"
+Butsu:RegisterEvent "OPEN_MASTER_LOOT_LIST"
 
 function Butsu:UPDATE_MASTER_LOOT_LIST()
 	UIDropDownMenu_Refresh(GroupLootDropDown)
 end
-Butsu:RegisterEvent"UPDATE_MASTER_LOOT_LIST"
+Butsu:RegisterEvent "UPDATE_MASTER_LOOT_LIST"
 
 do
 	local round = function(n)
@@ -149,15 +155,12 @@ do
 	function Butsu:SavePosition()
 		local point, parent, _, x, y = self:GetPoint()
 
-		_NS.db.framePosition = string.format(
-			'%s\031%s\031%d\031%d',
-			point, 'UIParent', round(x), round(y)
-		)
+		_NS.db.framePosition = string.format("%s\031%s\031%d\031%d", point, "UIParent", round(x), round(y))
 	end
 
 	function Butsu:LoadPosition()
 		local scale = self:GetScale()
-		local point, parentName, x, y = string.split('\031', _NS.db.framePosition)
+		local point, parentName, x, y = string.split("\031", _NS.db.framePosition)
 
 		self:ClearAllPoints()
 		self:SetPoint(point, parentName, point, x / scale, y / scale)
